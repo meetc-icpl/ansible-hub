@@ -64,3 +64,11 @@
     name: prometheus
     state: started
     enabled: true
+
+
+# Step 8: Ensure correct permissions for Prometheus binary
+- name: Set permissions for Prometheus binary
+  command: sudo chmod +x /usr/local/bin/prometheus
+
+- name: Set ownership for Prometheus binary
+  command: sudo chown root:root /usr/local/bin/prometheus
