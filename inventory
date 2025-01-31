@@ -1,14 +1,20 @@
-[monitoring_servers]
+# For single node deployment
+[single_node]
 localhost ansible_connection=local
 
+# For multi-node deployment
 [grafana]
-localhost ansible_connection=local
-
-[prometheus]
-localhost ansible_connection=local
+grafana-server ansible_host=10.0.0.1
 
 [node_exporter]
-localhost ansible_connection=local
+node-[01:10] ansible_host=10.0.0.[11:20]
 
 [process_exporter]
-localhost ansible_connection=local
+node-[01:10] ansible_host=10.0.0.[11:20]
+
+[prometheus]
+grafana-server ansible_host=10.0.0.1
+
+[all:vars]
+ansible_user=ubuntu
+ansible_become=yes
