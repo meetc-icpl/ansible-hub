@@ -7,7 +7,7 @@ After=network.target
 User=root
 Group=root
 Type=simple
-ExecStart=/usr/local/bin/process-exporter --config.path /usr/bin/process-exporter/config.yml
+ExecStart=/usr/local/bin/process-exporter --config.path /usr/bin/process-exporter/config.yml --web.listen-address=:9256
 Restart=always
 RestartSec=1
 StartLimitInterval=0
