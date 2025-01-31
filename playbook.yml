@@ -4,13 +4,21 @@
   become: true
   
   vars:
-    deployment_type: "{{ deploy_type | default('single') }}"  # 'single' or 'multi'
+    deployment_type: "{{ deploy_type | default('single') }}"
     deploy_components:
       grafana: false
       node_exporter: false
       process_exporter: false
       prometheus: false
 
+  pre_tasks:
+    - name: Validate system requirements
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution in ['Ubuntu', 'Debian', 'CentOS', 'RedHat', 'Fedora']
+          - ansible_distribution_major_version is version('18', '>=')
+        msg: "This playbook requires a supported Linux distribution"
+        
   tasks:
     - name: Deploy Grafana
       include_role:
