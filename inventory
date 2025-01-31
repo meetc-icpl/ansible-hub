@@ -1,5 +1,14 @@
-[monitoring]
+[monitoring_servers]
 localhost ansible_connection=local
 
-[monitoring:vars]
-ansible_python_interpreter=/usr/bin/python3
+[grafana]
+localhost ansible_connection=local
+
+[prometheus]
+localhost ansible_connection=local
+
+[node_exporter]
+localhost ansible_connection=local
+
+[process_exporter]
+localhost ansible_connection=local
