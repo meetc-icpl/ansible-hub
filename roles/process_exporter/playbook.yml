@@ -1,9 +1,6 @@
 ---
 - name: Setup Process Exporter
-  hosts: all
-  become: true
   tasks:
-
     # Download Process Exporter
     - name: Download Process Exporter tarball
       get_url:
