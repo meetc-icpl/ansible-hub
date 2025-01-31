@@ -1,45 +1,44 @@
 ---
 - name: Deploy Monitoring Stack
-  hosts: "{{ target_hosts | default('all') }}"
+  hosts: "{{ target_hosts | default('single_node') }}"
   become: true
   
   vars:
+    deployment_type: "{{ deploy_type | default('single') }}"  # 'single' or 'multi'
     deploy_components:
       grafana: false
       node_exporter: false
       process_exporter: false
       prometheus: false
 
-  pre_tasks:
-    - name: Validate system requirements
-      ansible.builtin.assert:
-        that:
-          - ansible_distribution == "Ubuntu"
-          - ansible_distribution_version is version('20.04', '>=')
-        msg: "This playbook requires Ubuntu 20.04 or higher"
-
   tasks:
     - name: Deploy Grafana
       include_role:
         name: grafana
-      when: deploy_components.grafana | bool
+      when: >
+        deploy_components.grafana | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['grafana'])
       tags: ['grafana']
 
     - name: Deploy Node Exporter
       include_role:
         name: node_exporter
-      when: deploy_components.node_exporter | bool
+      when: >
+        deploy_components.node_exporter | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['node_exporter'])
       tags: ['node_exporter']
 
     - name: Deploy Process Exporter
-      block:
-        - name: Include Process Exporter tasks
-          include_tasks: roles/process_exporter/playbook.yml
-      when: deploy_components.process_exporter | bool
+      include_tasks: roles/process_exporter/playbook.yml
+      when: >
+        deploy_components.process_exporter | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['process_exporter'])
       tags: ['process_exporter']
 
     - name: Deploy Prometheus
       include_role:
         name: prometheus
-      when: deploy_components.prometheus | bool
+      when: >
+        deploy_components.prometheus | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['prometheus'])
       tags: ['prometheus']
