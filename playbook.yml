@@ -29,7 +29,8 @@
       tags: ['node_exporter']
 
     - name: Deploy Process Exporter
-      include_tasks: roles/process_exporter/playbook.yml
+      include_role:
+        name: process_exporter
       when: >
         deploy_components.process_exporter | bool and
         (deployment_type == 'single' or inventory_hostname in groups['process_exporter'])
