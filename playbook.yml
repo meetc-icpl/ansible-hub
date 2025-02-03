@@ -7,6 +7,7 @@
     deployment_type: "{{ deploy_type | default('single') }}"
     deploy_components:
       grafana: false
+      loki: false
       node_exporter: false
       process_exporter: false
       prometheus: false
@@ -19,6 +20,15 @@
         deploy_components.grafana | bool and
         (deployment_type == 'single' or inventory_hostname in groups['grafana'])
       tags: ['grafana']
+
+    - name: Deploy Loki
+      include_role:
+        name: loki
+      when: >
+        deploy_components.loki | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['loki'])
+      tags: ['loki']
+
 
     - name: Deploy Node Exporter
       include_role:

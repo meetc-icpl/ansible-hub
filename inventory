@@ -7,6 +7,9 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
 [grafana]
 grafana-server ansible_host=10.0.0.1
 
+[loki]
+loki ansible_host=10.0.0.1
+
 [node_exporter]
 node-[01:10] ansible_host=10.0.0.[11:20]
 
@@ -14,7 +17,7 @@ node-[01:10] ansible_host=10.0.0.[11:20]
 node-[01:10] ansible_host=10.0.0.[11:20]
 
 [prometheus]
-grafana-server ansible_host=10.0.0.1
+prometheus ansible_host=10.0.0.1
 
 [all:vars]
 ansible_user=meet
