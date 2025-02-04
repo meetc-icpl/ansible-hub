@@ -2,7 +2,7 @@
 - name: Deploy Monitoring Stack
   hosts: "{{ target_hosts | default('single_node') }}"
   become: true
-  
+
   vars:
     deployment_type: "{{ deploy_type | default('single') }}"
     deploy_components:
@@ -28,7 +28,6 @@
         deploy_components.loki | bool and
         (deployment_type == 'single' or inventory_hostname in groups['loki'])
       tags: ['loki']
-
 
     - name: Deploy Node Exporter
       include_role:

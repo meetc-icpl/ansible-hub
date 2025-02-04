@@ -1,103 +1,109 @@
 ---
-- name: Install and Configure Loki on Ubuntu
-  hosts: localhost
-  become: yes
-  tasks:
-    - name: Install dependencies
-      apt:
-        name:
-          - wget
-          - unzip
-        state: present
+# Install required dependencies
+- name: Install dependencies
+  apt:
+    name:
+      - wget
+      - unzip
+    state: present
 
-    - name: Download Loki binary
-      get_url:
-        url: https://github.com/grafana/loki/releases/download/v2.9.0/loki-linux-amd64.zip
-        dest: /tmp/loki-linux-amd64.zip
+# Download Loki binary from the official GitHub release
+- name: Download Loki binary
+  get_url:
+    url: https://github.com/grafana/loki/releases/download/v2.9.0/loki-linux-amd64.zip
+    dest: /tmp/loki-linux-amd64.zip
 
-    - name: Unzip Loki binary
-      unarchive:
-        src: /tmp/loki-linux-amd64.zip
-        dest: /tmp
-        remote_src: yes
+# Unzip the Loki binary
+- name: Unzip Loki binary
+  unarchive:
+    src: /tmp/loki-linux-amd64.zip
+    dest: /tmp
+    remote_src: yes
 
-    - name: Move Loki binary to /usr/local/bin
-      command:
-        cmd: mv /tmp/loki-linux-amd64 /usr/local/bin/loki
+# Move Loki binary to a system-wide location
+- name: Move Loki binary to /usr/local/bin
+  command:
+    cmd: mv /tmp/loki-linux-amd64 /usr/local/bin/loki
 
-    - name: Make Loki binary executable
-      file:
-        path: /usr/local/bin/loki
-        mode: '0755'
+# Set executable permissions for Loki binary
+- name: Make Loki binary executable
+  file:
+    path: /usr/local/bin/loki
+    mode: '0755'
 
-    - name: Create Loki configuration directory
-      file:
-        path: /etc/loki
-        state: directory
-        mode: '0755'
+# Create Loki configuration directory
+- name: Create Loki configuration directory
+  file:
+    path: /etc/loki
+    state: directory
+    mode: '0755'
 
-    - name: Create Loki configuration file
-      copy:
-        dest: /etc/loki/loki-config.yaml
-        content: |
-          auth_enabled: false
+# Create Loki configuration file with required settings
+- name: Create Loki configuration file
+  copy:
+    dest: /etc/loki/loki-config.yaml
+    content: |
+      auth_enabled: false
 
-          server:
-            http_listen_port: 3100
+      server:
+        http_listen_port: 3100
 
-          ingester:
-            lifecycler:
-              address: 127.0.0.1
-              ring:
-                kvstore:
-                  store: inmemory
-                replication_factor: 1
-              final_sleep: 0s
-            chunk_idle_period: 5m
-            chunk_retain_period: 30s
-            max_transfer_retries: 0
+      ingester:
+        lifecycler:
+          address: 127.0.0.1
+          ring:
+            kvstore:
+              store: inmemory
+            replication_factor: 1
+          final_sleep: 0s
+        chunk_idle_period: 5m
+        chunk_retain_period: 30s
+        max_transfer_retries: 0
 
-          schema_config:
-            configs:
-              - from: 2020-10-24
-                store: boltdb
-                object_store: filesystem
-                schema: v11
-                index:
-                  prefix: index_
-                  period: 168h
+      schema_config:
+        configs:
+          - from: 2020-10-24
+            store: boltdb
+            object_store: filesystem
+            schema: v11
+            index:
+              prefix: index_
+              period: 168h
 
-          storage_config:
-            boltdb:
-              directory: /loki/index
-            filesystem:
-              directory: /loki/chunks
+      storage_config:
+        boltdb:
+          directory: /loki/index
+        filesystem:
+          directory: /loki/chunks
 
-          limits_config:
-            enforce_metric_name: false
-            reject_old_samples: true
-            reject_old_samples_max_age: 168h
+      limits_config:
+        enforce_metric_name: false
+        reject_old_samples: true
+        reject_old_samples_max_age: 168h
 
-          chunk_store_config:
-            max_look_back_period: 0s
+      chunk_store_config:
+        max_look_back_period: 0s
 
-          table_manager:
-            retention_deletes_enabled: true
-            retention_period: 168h
-        mode: '0644'
+      table_manager:
+        retention_deletes_enabled: true
+        retention_period: 168h
+    mode: '0644'
 
-    - name: Deploy Loki systemd service file from template
-      template:
-        src: templates/loki.service.j2
-        dest: /etc/systemd/system/loki.service
-        mode: '0644'
+# Deploy Loki systemd service file from template
+- name: Deploy Loki systemd service file from template
+  template:
+    src: templates/loki.service.j2
+    dest: /etc/systemd/system/loki.service
+    mode: '0644'
 
-    - name: Reload systemd to recognize Loki service
-      systemd:
-        daemon_reload: yes
+# Reload systemd to recognize the new Loki service
+- name: Reload systemd to recognize Loki service
+  systemd:
+    daemon_reload: yes
 
-    - name: Enable and start Loki service
-      systemd:
-        name: loki
-        enabled: yes
-        state: started
+# Enable and start the Loki service
+- name: Enable and start Loki service
+  systemd:
+    name: loki
+    enabled: yes
+    state: started
