@@ -13,11 +13,13 @@
 ansible-playbook playbook.yml -e '{
   "deploy_components": {
     "grafana": true,
+    "loki": true,
     "node_exporter": true,
     "process_exporter": true,
     "prometheus": true
   }
 }'
+
 
 # Deploy specific components
 ansible-playbook playbook.yml -e '{
