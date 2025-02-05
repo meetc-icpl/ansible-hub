@@ -1,6 +1,6 @@
 ---
 - name: Install and Configure Loki on Ubuntu
-  hosts: localhost
+  hosts: all
   become: yes
   tasks:
     - name: Install dependencies
@@ -44,10 +44,11 @@
 
           server:
             http_listen_port: 3100
+            http_listen_address: 122.179.155.33
 
           ingester:
             lifecycler:
-              address: 127.0.0.1
+              address: 122.179.155.33
               ring:
                 kvstore:
                   store: inmemory
@@ -86,7 +87,7 @@
             retention_period: 168h
         mode: '0644'
 
-    - name: Start Loki as a system service
+    - name: Create Loki systemd service file
       copy:
         dest: /etc/systemd/system/loki.service
         content: |
@@ -95,7 +96,9 @@
           After=network.target
 
           [Service]
-          ExecStart=/usr/local/bin/loki -config.file=/etc/loki/loki-config.yaml
+          ExecStart=/usr/local/bin/loki -config.file=/etc/loki/loki-config.yaml \
+                    -server.http-listen-address=0.0.0.0
+
           Restart=always
           User=root
           Group=root
