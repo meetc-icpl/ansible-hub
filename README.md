@@ -25,17 +25,20 @@ ansible-playbook playbook.yml -e '{
 ansible-playbook playbook.yml -e '{
   "deploy_components": {
     "grafana": true,
-    "prometheus": true
+    "prometheus": true,
+    "loki": true
   }
 }'
 ```
 
 ## 📊 Components & Ports
 
+- Loki ``:3100``
 - Grafana ``:3000``
 - Prometheus ``:9090``
 - Node Exporter ``:9100``
 - Process Exporter ``:9256``
+
 
 ## 🔧 Requirements
 
@@ -53,6 +56,7 @@ sudo systemctl status [service-name]
 # Available services:
 # - grafana-server
 # - prometheus
+# - loki
 # - node_exporter
 # - process-exporter
 ```
