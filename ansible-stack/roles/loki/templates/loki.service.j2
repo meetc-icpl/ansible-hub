@@ -1,0 +1,14 @@
+[Unit]
+Description=Loki
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/loki -config.file=/etc/loki/loki-config.yaml \
+          -server.http-listen-address=0.0.0.0
+
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

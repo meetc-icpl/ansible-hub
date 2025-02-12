@@ -1,0 +1,31 @@
+[single_node]
+34.47.158.146 ansible_connection=meetchauhan2617 ansible_python_interpreter=/usr/bin/python3
+#localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3
+
+# For multi-node deployment
+[grafana]
+34.47.158.146  ansible_user=meetchauhan2617 
+#grafana-server ansible_host=10.0.0.1
+
+[loki]
+34.47.158.146 ansible_user=meetchauhan2617
+#loki ansible_host=10.0.0.1
+
+[node_exporter]
+34.47.158.146 ansible_user=meetchauhan2617
+#node-[01:10] ansible_host=10.0.0.[11:20]
+
+[process_exporter]
+34.47.158.146 ansible_user=meetchauhan2617
+#node-[01:10] ansible_host=10.0.0.[11:20]
+
+[prometheus]
+34.47.158.146 ansible_user=meetchauhan2617
+#prometheus ansible_host=10.0.0.1
+
+[otelcollector]
+34.47.158.146 ansible_user=meetchauhan2617
+
+[all:vars]
+ansible_user=meet
+ansible_become=yes

@@ -1,0 +1,58 @@
+---
+#- name: Install OpenTelemetry Collector
+#  hosts: all
+#  become: yes
+#  tasks:
+
+    - name: Install wget and systemctl
+      apt:
+        name:
+          - wget
+          - systemd
+        state: present
+
+    - name: Download the latest OpenTelemetry Collector tarball
+      get_url:
+        url: https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.119.0/otelcol_0.119.0_linux_amd64.tar.gz
+        dest: /tmp/otelcol.tar.gz
+
+    - name: Extract the tarball to /opt/otel-collector
+      command: sudo tar -xvf /tmp/otelcol.tar.gz -C /opt/
+
+    - name: Move the OpenTelemetry Collector binary to /usr/local/bin/
+      command: mv /opt/otelcol /usr/local/bin/otelcol
+
+    - name: Set permissions for OpenTelemetry Collector
+      file:
+        path: /usr/local/bin/otelcol
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create OpenTelemetry Collector service file
+      template:
+        src: otelcol.service.j2
+        dest: /etc/systemd/system/otelcol.service
+        mode: '0644'
+
+    - name: Create the /etc/otelcol directory if it doesn't exist
+      file:
+        path: /etc/otelcol
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create or update the config.yaml file using otel-config.j2
+      template:
+        src: otel-config.j2
+        dest: /etc/otelcol/config.yaml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Start OpenTelemetry Collector service
+      systemd:
+        name: otelcol.service
+        state: started
+        enabled: yes

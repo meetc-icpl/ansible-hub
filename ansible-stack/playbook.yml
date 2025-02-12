@@ -1,0 +1,63 @@
+---
+- name: Deploy Monitoring Stack
+  hosts: "{{ target_hosts | default('single_node') }}"
+  become: true
+
+  vars:
+    deployment_type: "{{ deploy_type | default('single') }}"
+    deploy_components:
+      grafana: false
+      loki: false
+      node_exporter: false
+      process_exporter: false
+      otelcollector: false
+      prometheus: false
+
+  tasks:
+    - name: Deploy Grafana
+      include_role:
+        name: grafana
+      when: >
+        deploy_components.grafana | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['grafana'])
+      tags: ['grafana']
+
+    - name: Deploy Loki
+      include_role:
+        name: loki
+      when: >
+        deploy_components.loki | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['loki'])
+      tags: ['loki']
+
+    - name: Deploy Node Exporter
+      include_role:
+        name: node_exporter
+      when: >
+        deploy_components.node_exporter | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['node_exporter'])
+      tags: ['node_exporter']
+
+    - name: Deploy Process Exporter
+      include_role:
+        name: process_exporter
+      when: >
+        deploy_components.process_exporter | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['process_exporter'])
+      tags: ['process_exporter']
+
+    - name: Deploy otelcollector
+      include_role:
+        name: otelcollector
+      when: >
+        deploy_components.otelcollector | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['otelcollector'])
+      tags: ['otelcollector']
+
+    - name: Deploy Prometheus
+      include_role:
+        name: prometheus
+      when: >
+        deploy_components.prometheus | bool and
+        (deployment_type == 'single' or inventory_hostname in groups['prometheus'])
+      tags: ['prometheus']

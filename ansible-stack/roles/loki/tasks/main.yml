@@ -1,0 +1,62 @@
+---
+#- name: Install and Configure Loki on Ubuntu
+#  hosts: all
+#  become: yes
+#  tasks:
+# Install required dependencies
+    - name: Install dependencies
+      apt:
+        name:
+          - wget
+          - unzip
+        state: present
+
+    - name: Download Loki binary
+      get_url:
+        url: https://github.com/grafana/loki/releases/download/v2.9.0/loki-linux-amd64.zip
+        dest: /tmp/loki-linux-amd64.zip
+
+    - name: Unzip Loki binary
+      unarchive:
+        src: /tmp/loki-linux-amd64.zip
+        dest: /tmp
+        remote_src: yes
+
+    - name: Move Loki binary to /usr/local/bin
+      command:
+        cmd: mv /tmp/loki-linux-amd64 /usr/local/bin/loki
+
+    - name: Make Loki binary executable
+      file:
+        path: /usr/local/bin/loki
+        mode: '0755'
+
+    - name: Create Loki configuration directory
+      file:
+        path: /etc/loki
+        state: directory
+        mode: '0755'
+
+    - name: Deploy Loki configuration file from template
+      template:
+        src: loki-config.yaml.j2
+        dest: /etc/loki/loki-config.yaml
+        mode: '0644'
+      vars:
+        loki_ip: "{{ ansible_default_ipv4.address }}"
+
+    - name: Deploy Loki systemd service from template
+      template:
+        src: loki.service.j2
+        dest: /etc/systemd/system/loki.service
+        mode: '0644'
+
+    - name: Reload systemd to recognize Loki service
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start Loki service
+      systemd:
+        name: loki
+        enabled: yes
+        state: started
