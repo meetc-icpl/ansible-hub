@@ -1,0 +1,59 @@
+---
+# Step 1: Ensure wget and tar are installed
+- name: Ensure wget and tar are installed
+  apt:
+    name:
+      - wget
+      - tar
+    state: present
+
+# Step 2: Download and Extract Prometheus tarball
+- name: Download Prometheus tarball
+  get_url:
+    url: "{{ prometheus_download_url }}"
+    dest: /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+
+- name: Extract Prometheus tarball
+  unarchive:
+    src: /tmp/prometheus-{{ prometheus_version }}.linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+# Step 3: Move Prometheus binaries and files
+- name: Move Prometheus binaries
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  loop:
+    - { src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/prometheus", dest: "/usr/local/bin/prometheus" }
+    - { src: "/tmp/prometheus-{{ prometheus_version }}.linux-amd64/promtool", dest: "/usr/local/bin/promtool" }
+
+
+
+# Step 4: Create Prometheus configuration file dynamically
+
+- name: Ensure /etc/prometheus directory exists
+  file:
+    path: /etc/prometheus
+    state: directory
+    mode: '0755'
+
+- name: Create Prometheus configuration file
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    mode: '0644'
+
+
+# Step 5: Create the Prometheus systemd service file
+- name: Create Prometheus systemd service file
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+
+- name: Start Prometheus service
+  systemd:
+    name: prometheus
+    state: started
+    enabled: true

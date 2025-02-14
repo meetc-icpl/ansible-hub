@@ -1,0 +1,17 @@
+[node_exporter]
+node1 ansible_host=13.201.95.196    ansible_user=ubuntu     ansible_ssh_private_key_file=/home/meet/Downloads/anubhav.pem
+node2 ansible_host=13.126.58.70     ansible_user=ubuntu     ansible_ssh_private_key_file=/home/meet/Downloads/anubhav.pem
+node3 ansible_host=13.235.17.140    ansible_user=ubuntu     ansible_ssh_private_key_file=/home/meet/Downloads/anubhav.pem
+
+#node1 ansible_host=172.17.16.34  ansible_user=meet ansible_ssh_private_key_file=/root/.ssh/id_rsa
+
+
+[prometheus_grafana]
+prometheus_server ansible_host=172.17.16.34 ansible_user=meet ansible_ssh_private_key_file=/root/.ssh/id_rsa
+
+
+
+
+
+#prometheus_server ansible_host=172.17.16.34 ansible_user=meet ansible_ssh_private_key_file=/root/.ssh/id_rsa
+#ansible_user=meet ansible_ssh_private_key_file=/root/.ssh/id_rsa

@@ -1,0 +1,20 @@
+---
+- name: Full Observability Setup
+  hosts: prometheus_grafana
+  become: yes
+  tasks:
+    - name: Install and configure Prometheus
+      include_role:
+        name: prometheus
+
+    - name: Install and configure Grafana
+      include_role:
+        name: grafana
+
+- name: Install Node Exporter on multiple servers
+  hosts: node_exporter
+  become: yes
+  tasks:
+    - name: Install and configure Node Exporter
+      include_role:
+        name: node_exporter
