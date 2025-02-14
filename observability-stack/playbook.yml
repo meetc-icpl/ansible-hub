@@ -18,3 +18,11 @@
     - name: Install and configure Node Exporter
       include_role:
         name: node_exporter
+
+- name: Install Process Exporter on multiple servers
+  hosts: process_exporter
+  become: yes
+  tasks:
+    - name: Install and configure Process Exporter
+      include_role:
+        name: process_exporter

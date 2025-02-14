@@ -17,8 +17,17 @@ scrape_configs:
     static_configs:
       - targets: ["{{ ansible_default_ipv4.address }}:9090"]
 
+  # Scraping Node Exporters
   - job_name: "node_exporter"
     static_configs:
       {% for host in groups['node_exporter'] %}
       - targets: ["{{ hostvars[host]['ansible_host'] }}:9100"]
+      {% endfor %}
+
+
+  # Scraping Process Exporters
+  - job_name: "process_exporter"
+    static_configs:
+      {% for host in groups['process_exporter'] %}
+      - targets: ["{{ hostvars[host]['ansible_host'] }}:9256"]
       {% endfor %}
