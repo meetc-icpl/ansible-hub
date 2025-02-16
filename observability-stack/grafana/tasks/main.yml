@@ -49,3 +49,95 @@
 - name: Enable the firewall
   ufw:
     state: enabled
+
+- name: Wait for Grafana service to be up
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}:3000"
+    method: GET
+    status_code: 200
+  register: __result
+  until: __result.status == 200
+  retries: 120
+  delay: 1
+
+
+- name: change admin password for grafana gui
+  shell: grafana-cli admin reset-admin-password {{ grafana_admin_password }}
+  register: __command_admin
+  changed_when: __command_admin.rc !=0
+
+# - name: change admin user
+#   lineinfile:
+#     path: /etc/grafana/grafana.ini
+#     regexp: "{{ item.before }}"
+#     line: "{{ item.after }}"
+#   with_items:
+#   - { before: "^;admin_user = admin", admin: "admin_user = {{ grafana_admin_user }}"}
+#   - { before: "^;admin_password = admin", admin: "admin_password = {{ grafana_admin_password }}"}
+
+- name: Change admin user
+  lineinfile:
+    path: /etc/grafana/grafana.ini
+    regexp: "{{ item.before }}"
+    line: "{{ item.after }}"
+  with_items:
+    - { before: "^;admin_user = admin", after: "admin_user = {{ grafana_admin_user }}" }
+    - { before: "^;admin_password = admin", after: "admin_password = {{ grafana_admin_password }}" }
+
+
+- name: add prometheus datasource
+  grafana_datasource:
+    name: "prometheus-local"
+    grafana_url: "http://{{ ansible_default_ipv4.address }}:3000"
+    grafana_user: "{{ grafana_admin_user }}"
+    grafana_password: "{{ grafana_admin_password }}"
+    org_id: "1"
+    ds_type: "prometheus"
+    ds_url: "http://{{ ansible_default_ipv4.address }}:9090"
+  changed_when: false
+
+- name: Install Node Exporter Dashboard
+  copy:
+    src: "node-exporter.json"
+    dest: "/var/lib/grafana/node-exporter.json"
+    mode: '0644'
+
+- name: Install Process Exporter Dashboard
+  copy:
+    src: "process-exporter.json"
+    dest: "/var/lib/grafana/process-exporter.json"
+    mode: '0644'
+
+# - name: activate dashboard for node exporter
+#   template:
+#     src: dashboard-node-exporter.yml.j2
+#     dest: /etc/grafana/provisioning/dashboads/dashboard-node-exporter.yml
+#     mode: 0755
+#   notify: restart_grafana
+
+- name: Ensure Grafana dashboards directory exists
+  file:
+    path: /etc/grafana/provisioning/dashboards
+    state: directory
+    mode: 0755
+
+- name: Activate dashboard for Node Exporter
+  template:
+    src: dashboard-node-exporter.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard-node-exporter.yml
+    mode: 0755
+
+- name: Activate dashboard for Process Exporter
+  template:
+    src: dashboard-process-exporter.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard-process-exporter.yml
+    mode: 0755
+
+
+- name: Restart Grafana after activating dashboard
+  systemd:
+    name: grafana-server
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+
